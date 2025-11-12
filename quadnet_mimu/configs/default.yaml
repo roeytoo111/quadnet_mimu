@@ -1,0 +1,42 @@
+# Default configuration for QuadNet MIMU training
+
+data:
+  data_dir: "../dataset_repo"  # Path to dataset repository
+  window_length: 120  # Window length in samples (1 second at 120Hz)
+  stride: 120  # Stride for sliding windows (non-overlapping by default)
+  target: "distance"  # Regression target: "distance", "altitude", or "both"
+  sampling_rate: 120.0  # IMU sampling rate in Hz
+  gt_sampling_rate: 10.0  # Ground truth sampling rate in Hz
+  normalize: true
+  per_imu_normalize: false  # If true, normalize per IMU separately
+
+model:
+  # QuadNet architecture parameters
+  conv_channels: [64, 128, 128, 256, 256, 512, 512]  # Output channels for each conv layer
+  conv_kernels: [5, 5, 3, 3, 3, 3, 3]  # Kernel sizes
+  pool_sizes: [0, 2, 0, 2, 0, 0, 0]  # Pooling after layers (0 = no pooling, 2 = pool with kernel 2)
+  fc_dims: [256, 128]  # Fully connected layer dimensions
+  dropout: 0.5
+  use_batch_norm: true
+  ara_shared_weights: true  # For ARA mode: use shared weights across IMUs
+
+training:
+  batch_size: 64
+  epochs: 200
+  learning_rate: 0.001
+  weight_decay: 0.0
+  scheduler: "ReduceLROnPlateau"  # Options: "ReduceLROnPlateau", "CosineAnnealing", null
+  early_stop_patience: 20
+  device: null  # null = auto-detect (cuda if available, else cpu)
+  output_dir: "results"
+  augment: false
+  augment_params:
+    noise_std: 0.01
+    bias_drift: 0.001
+    scale_factor: 0.02
+
+evaluation:
+  metrics: ["rmse", "mae", "max_error", "std_error"]
+  save_predictions: true
+  visualize: true
+
